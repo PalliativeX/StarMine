@@ -6,8 +6,9 @@ public class Leader : Unit
 
 	SpeedupAbility speedupAbility;
 
-	private void Start()
+	protected override void Start()
 	{
+		base.Start();
 		speedupAbility = new SpeedupAbility(5, 7, this);
 	}
 

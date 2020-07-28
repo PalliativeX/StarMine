@@ -26,8 +26,9 @@ public class Worker : Unit
 
 	float miningTimeLeft = 0f;
 
-	private void Start()
+	protected override void Start()
 	{
+		base.Start();
 	}
 
 	protected override void Update()
@@ -65,8 +66,6 @@ public class Worker : Unit
 
 		if (targetVoxel != null)
 		{
-			// TODO: First come close to a voxel
-
 			if (miningTimeLeft > 0f)
 			{
 				miningTimeLeft -= 1 * Time.deltaTime;

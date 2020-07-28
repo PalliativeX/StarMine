@@ -20,7 +20,8 @@ public class Map : MonoBehaviour
 
 	public MapGenerator mapGenerator;
 
-	public Player player;
+	[SerializeField]
+	LayerMask terrainMask, unitMask, buildingMask;
 
 	private void Awake()
 	{
@@ -52,7 +53,10 @@ public class Map : MonoBehaviour
 
 		BaseMetrics.Width = width;
 		BaseMetrics.Length = length;
-	}
+		BaseMetrics.terrainMask = terrainMask;
+		BaseMetrics.unitMask = unitMask;
+		BaseMetrics.buildingMask = buildingMask;
+}
 
 	// TODO: Only update when a Voxel has been destroyed
 	private void Update()

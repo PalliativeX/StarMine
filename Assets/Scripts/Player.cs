@@ -7,13 +7,8 @@ public enum Team
 	RED, BLUE
 }
 
-
 public abstract class Player : MonoBehaviour
 {
-	// TODO: A player should not have a direct access to the map, 
-	// only to what he already discovered
-	public Map map;
-
 	protected Team team;
 
 	[Range(50, 300)]
@@ -23,10 +18,12 @@ public abstract class Player : MonoBehaviour
 	[Range(0, 100)]
 	public int startingDiamonds = 0;
 
-	public Worker workerPrefab;
-	public Building basePrefab;
-
 	protected int earth, stones, diamonds;
+
+	[SerializeField]
+	private Worker workerPrefab;
+	[SerializeField]
+	private Building basePrefab;
 
 	protected List<Unit> units;
 	protected List<Building> buildings;
@@ -45,6 +42,31 @@ public abstract class Player : MonoBehaviour
 
 	protected virtual void Update()
 	{
+	}
+
+	public void AddBaseAndWorker()
+	{
+		Worker worker = Instantiate(workerPrefab, transform);
+		if (team == Team.RED)
+		{
+			worker.transform.localPosition = new Vector3(3, 0.5f, 3);
+		}
+		else
+		{
+			worker.transform.localPosition = new Vector3(6, 0.5f, 6);
+		}
+		AddUnit(worker);
+
+		Building baseBuilding = Instantiate(basePrefab, transform);
+		if (team == Team.RED)
+		{
+			baseBuilding.transform.localPosition = BaseMetrics.GetFirstBaseSpawn();
+		}
+		else
+		{
+			baseBuilding.transform.localPosition = BaseMetrics.GetFirstOppositeBaseSpawn();
+		}
+		AddBuilding(baseBuilding);
 	}
 
 	public void AddUnit(Unit unit)
@@ -100,6 +122,23 @@ public abstract class Player : MonoBehaviour
 			if (building.Chosen)
 				return building;
 		}
+		return null;
+	}
+
+	public Targetable GetTargetableChosen()
+	{
+		foreach (Unit unit in units)
+		{
+			if (unit.Chosen)
+				return unit;
+		}
+
+		foreach (Building building in buildings)
+		{
+			if (building.Chosen)
+				return building;
+		}
+
 		return null;
 	}
 
@@ -190,6 +229,19 @@ public abstract class Player : MonoBehaviour
 			{
 				diamonds = value;
 			}
+		}
+	}
+
+	public Team Team
+	{
+		get { return team; }
+	}
+
+	public bool HasLeader
+	{
+		get { return hasLeader; }
+		set {
+			hasLeader = value;
 		}
 	}
 

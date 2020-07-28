@@ -4,7 +4,7 @@ using UnityEngine;
 
 public enum UnitType
 {
-	Worker, Scout, Leader  // TODO: To be continued
+	Worker, Scout, Leader
 }
 
 class MoveAction : Action
@@ -28,12 +28,10 @@ class AttackAction : Action
 }
 
 // TODO: Probably make abstract
-public class Unit : MonoBehaviour
+public abstract class Unit : Targetable
 {
 	public float speed;
 	public UnitType type;
-
-	protected Player player;
 
 	public float health;
 	Transform target;
@@ -43,35 +41,23 @@ public class Unit : MonoBehaviour
 
 	float currentAttackCooldown;
 
-	protected Team team;
-
 	protected Queue<Action> actions;
 	protected Action currentAction;
 
 	protected Vector3 destination;
 
-	private bool chosen;
-
-	Color defaultColor;
-
-	private void Awake()
+	protected override void Awake()
 	{
-		defaultColor = GetComponent<Renderer>().material.color;
-		chosen = false;
+		base.Awake();
+		
 		destination = Vector3.zero;
 		actions = new Queue<Action>();
-		if (team == Team.RED)
-		{
-			player = GameObject.FindGameObjectsWithTag("HumanPlayer")[0].GetComponent<Player>();
-		}
-		else
-		{
-			player = GameObject.FindGameObjectsWithTag("EnemyPlayer")[0].GetComponent<Player>();
-		}
 	}
 
-	protected virtual void Update()
+	protected override void Update()
 	{
+		base.Update();
+
 		if (currentAction == null && actions.Count > 0)
 		{
 			currentAction = actions.Dequeue();
@@ -81,9 +67,8 @@ public class Unit : MonoBehaviour
 			}
 			else if (currentAction is AttackAction)
 			{
-				// TODO: Use attack range
 				Transform enemy = ((AttackAction)currentAction).target;
-				Vector3 targetPos = BaseMetrics.GetDest(this.transform.position, enemy.position, attackRange);
+				Vector3 targetPos = BaseMetrics.GetDest(transform.position, enemy.position, attackRange);
 				Vector3 enemyPos = enemy.position;
 				// TODO: Add Y coord handling
 				if (Mathf.Abs(transform.position.x - enemyPos.x) > attackRange ||
@@ -102,24 +87,20 @@ public class Unit : MonoBehaviour
 
 		currentAttackCooldown -= Time.deltaTime;
 
-		HandleMovement();
+		TryMove();
 	}
 
-	void HandleMovement()
+	void TryMove()
 	{
-		// REWRITE THIS SHIT
 		if (destination != Vector3.zero)
 		{
-			Vector3 direction = (destination - transform.position).normalized;
-
-			transform.position += direction * speed * Time.deltaTime;
-			if (Mathf.Abs(transform.position.x - destination.x) <= 0.05f || Mathf.Abs(transform.position.z - destination.z) <= 0.05f)
+			if (Mathf.Abs(transform.position.x - destination.x) <= 0.02f || Mathf.Abs(transform.position.z - destination.z) <= 0.02f)
 			{
-				transform.position.Set(destination.x, transform.position.y, destination.z);
 				destination = Vector3.zero;
 				currentAction = null;
+				return;
 			}
-
+			transform.position = Vector3.MoveTowards(transform.position, destination, speed * Time.deltaTime);
 		}
 	}
 
@@ -171,13 +152,11 @@ public class Unit : MonoBehaviour
 	public void AddMoveAction(Vector3 destination)
 	{
 		actions.Enqueue(new MoveAction(destination));
-		//this.destination = destination;
 	}
 
 	public void AddAttackAction(Transform target)
 	{
 		actions.Enqueue(new AttackAction(target));
-		//this.target = target;
 	}
 
 	public void RemoveAllActions()
@@ -191,35 +170,10 @@ public class Unit : MonoBehaviour
 		player.RemoveUnit(this);
 	}
 
-	public Team Team
-	{
-		get { return team; }
-		set {
-			team = value;
-		}
-	}
-
 	public Vector3 Destination
 	{
 		get { return destination;  }
 		set { destination = value; }
-	}
-
-	public bool Chosen
-	{
-		get { return chosen; }
-		set {
-			if (value)
-			{
-				GetComponent<MeshRenderer>().material.color = Color.green;
-			}
-			else
-			{
-				GetComponent<MeshRenderer>().material.color = defaultColor;
-			}
-
-			chosen = value;
-		}
 	}
 
 }

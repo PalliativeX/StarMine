@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class PlayerGUI : MonoBehaviour
@@ -45,8 +46,8 @@ public class PlayerGUI : MonoBehaviour
 
 	public void SetKeyCode(string keyStr)
 	{
-		KeyCode key = (KeyCode)keyStr.ToCharArray()[0];
-		CurrentKeyPressed = key;
+		KeyCode key = (KeyCode)Enum.Parse(typeof(KeyCode), keyStr);
+		currentlyPressedKey = key;
 	}
 
 	public KeyCode CurrentKeyPressed

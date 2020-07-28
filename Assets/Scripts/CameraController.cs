@@ -2,25 +2,16 @@
 
 public class CameraController : MonoBehaviour
 {
-	// FIXME: Do we really need a map for getting bounds?
 	[SerializeField]
-	Map map;
-
-	public float moveSpeed = 5f;
-	public float zoomSpeed;
-
-	public float borderThickness = 15f;
-
-	public float minZoom, maxZoom;
+	float moveSpeed = 5f;
+	[SerializeField]
+	float zoomSpeed;
+	[SerializeField]
+	float borderThickness = 15f;
+	[SerializeField]
+	float minZoom, maxZoom;
 
 	private float zoom;
-	private float boundX, boundZ;
-
-	private void Start()
-	{
-		boundX = map.Width;
-		boundZ = map.Length;
-	}
 
 	void Update()
 	{
@@ -63,20 +54,10 @@ public class CameraController : MonoBehaviour
 
 		float clampingOffsetZ = 4;
 
-		pos.x = Mathf.Clamp(pos.x, 0, boundX);
-		pos.z = Mathf.Clamp(pos.z, -clampingOffsetZ, boundZ-clampingOffsetZ);
+		pos.x = Mathf.Clamp(pos.x, 0, BaseMetrics.Width);
+		pos.z = Mathf.Clamp(pos.z, -clampingOffsetZ, BaseMetrics.Length-clampingOffsetZ);
 
 		transform.position = pos;
-	}
-
-	public float BoundX
-	{
-		get { return boundX; }
-	}
-
-	public float BoundZ
-	{
-		get { return boundZ; }
 	}
 
 	public float Zoom

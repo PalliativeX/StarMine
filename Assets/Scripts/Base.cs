@@ -13,23 +13,30 @@ public class Base : Building
 
 	readonly int workerProductionTime = 10;
 	readonly int leaderProductionTime = 25;
-
 	bool inProduction = false;
 	float productionTimeLeft = 0f;
 
-	private void Start()
+	Vector3 spawnRelativeToBase = new Vector3(-2.9f, 0.7f, 0.35f);
+	public Vector3 RallyPoint { get; set; } // Relative to current unit pos
+
+	protected override void Start()
 	{
-		
+		base.Start();
+
+		RallyPoint = new Vector3(-1.3f, 0f, 0);
 	}
 
-	private void Update()
+	protected override void Update()
 	{
+		base.Update();
 	}
 
 	public Worker CreateWorker()
 	{
 		Worker worker = Instantiate(workerPrefab, transform);
-		worker.transform.localPosition = new Vector3(2, 0.5f, 2);
+		worker.transform.localPosition = spawnRelativeToBase;
+
+		worker.AddMoveAction(worker.transform.position + RallyPoint);
 
 		return worker;
 	}
@@ -37,7 +44,9 @@ public class Base : Building
 	public Leader CreateLeader()
 	{
 		Leader leader = Instantiate(leaderPrefab, transform);
-		leader.transform.localPosition = new Vector3(2, 0.5f, 2);
+		leader.transform.localPosition = spawnRelativeToBase;
+
+		leader.AddMoveAction(leader.transform.position + RallyPoint);
 
 		return leader;
 	}
@@ -47,6 +56,5 @@ public class Base : Building
 		inProduction = false;
 		productionTimeLeft = 0f;
 	}
-
 
 }
