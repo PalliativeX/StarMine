@@ -2,9 +2,12 @@
 
 public class MinimapInput : MonoBehaviour
 {
-	public CameraController cameraController;
-
-	public RectTransform minimapPanel;
+	[SerializeField]
+	CameraController cameraController;
+	[SerializeField]
+	HumanPlayerInputController inputController;
+	[SerializeField]
+	RectTransform minimapPanel;
 	Vector2 min, max;
 
 	public void Awake()
@@ -17,7 +20,7 @@ public class MinimapInput : MonoBehaviour
 
 	private void Update()
 	{
-		if (Input.GetMouseButton(0))
+		if (Input.GetMouseButton(0) && !inputController.isSelecting)
 		{
 			Vector2 mousePos = Input.mousePosition;
 			if (mousePos.x >= min.x && mousePos.x <= max.x && 

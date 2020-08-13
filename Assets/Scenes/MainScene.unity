@@ -120,63 +120,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &88964781
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 88964783}
-  - component: {fileID: 88964782}
-  m_Layer: 0
-  m_Name: Map Generator
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &88964782
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 88964781}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8b6aa9a6d9e79ff499ef192c59cff5db, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  useFixedSeed: 1
-  seed: 1485
-  diamondsPercentHigh: 0
-  diamondsPercentLow: 0.2
-  earthPercentHigh: 0.6
-  earthPercentLow: 0
-  earthVoxelPrefab: {fileID: 4167767683295848613, guid: 171ad7e5667640741adfafe858048467,
-    type: 3}
-  stoneVoxelPrefab: {fileID: 4167767683295848613, guid: 7056c17bcdd78794681ff178cfb826d7,
-    type: 3}
-  diamondVoxelPrefab: {fileID: 4167767683295848613, guid: 11adc4e206b26294188f2e1ec0431b74,
-    type: 3}
-  lavaVoxelPrefab: {fileID: 4167767683295848613, guid: ebea8ea51b50ebf40805828ffa47c9cf,
-    type: 3}
---- !u!4 &88964783
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 88964781}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &110301618
 GameObject:
   m_ObjectHideFlags: 0
@@ -406,8 +349,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mapType: 1
-  mapGenerator: {fileID: 88964782}
-  player: {fileID: 0}
+  mapGenerator: {fileID: 701816976}
+  terrainMask:
+    serializedVersion: 2
+    m_Bits: 256
+  unitMask:
+    serializedVersion: 2
+    m_Bits: 512
+  buildingMask:
+    serializedVersion: 2
+    m_Bits: 1024
 --- !u!4 &238219719
 Transform:
   m_ObjectHideFlags: 0
@@ -521,7 +472,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e7222459ec5f704480240f3808217ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  map: {fileID: 238219718}
   startingEarth: 100
   startingStones: 50
   startingDiamonds: 0
@@ -718,11 +668,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2535ce229c844b94884827821aa31b8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  map: {fileID: 238219718}
   moveSpeed: 15
   zoomSpeed: 10
   borderThickness: 10
-  minZoom: 10
+  minZoom: 15
   maxZoom: 5
 --- !u!4 &488243392
 Transform:
@@ -731,14 +680,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 488243390}
-  m_LocalRotation: {x: 0.46174863, y: 0, z: 0, w: 0.8870109}
-  m_LocalPosition: {x: 20, y: 10, z: 20}
+  m_LocalRotation: {x: 0.5519369, y: 0, z: 0, w: 0.83388585}
+  m_LocalPosition: {x: 20, y: 15, z: 20}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 963194228}
   m_Father: {fileID: 0}
-  m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 55, y: 0, z: 0}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 67, y: 0, z: 0}
 --- !u!1 &657088398
 GameObject:
   m_ObjectHideFlags: 0
@@ -816,6 +765,63 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 657088398}
   m_CullTransparentMesh: 0
+--- !u!1 &701816975
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 701816977}
+  - component: {fileID: 701816976}
+  m_Layer: 0
+  m_Name: Map Generator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &701816976
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 701816975}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b6aa9a6d9e79ff499ef192c59cff5db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  useFixedSeed: 1
+  seed: 1024
+  diamondsPercentHigh: 0
+  diamondsPercentLow: 0.2
+  earthPercentHigh: 0.6
+  earthPercentLow: 0
+  earthVoxelPrefab: {fileID: 4167767683295848613, guid: 171ad7e5667640741adfafe858048467,
+    type: 3}
+  stoneVoxelPrefab: {fileID: 4167767683295848613, guid: 7056c17bcdd78794681ff178cfb826d7,
+    type: 3}
+  diamondVoxelPrefab: {fileID: 4167767683295848613, guid: 11adc4e206b26294188f2e1ec0431b74,
+    type: 3}
+  lavaVoxelPrefab: {fileID: 4167767683295848613, guid: ebea8ea51b50ebf40805828ffa47c9cf,
+    type: 3}
+--- !u!4 &701816977
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 701816975}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -1772,7 +1778,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 35, y: 0, z: 0}
 --- !u!114 &1313292231
 MonoBehaviour:
@@ -1787,6 +1793,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cameraController: {fileID: 488243391}
+  inputController: {fileID: 1797485577}
   minimapPanel: {fileID: 220622872}
 --- !u!20 &1313292232
 Camera:
@@ -2619,7 +2626,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5089d2158d07f1743907acfc1c324899, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  map: {fileID: 238219718}
   startingEarth: 100
   startingStones: 50
   startingDiamonds: 0
@@ -2627,15 +2633,6 @@ MonoBehaviour:
     type: 3}
   basePrefab: {fileID: 3776970224372576370, guid: b080b9c6ee75f014b80e518aee358bf4,
     type: 3}
-  terrainMask:
-    serializedVersion: 2
-    m_Bits: 256
-  unitMask:
-    serializedVersion: 2
-    m_Bits: 512
-  buildingMask:
-    serializedVersion: 2
-    m_Bits: 1024
 --- !u!4 &1797485575
 Transform:
   m_ObjectHideFlags: 0
@@ -2679,7 +2676,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36d2ad6482897b545b1680bfc0a75f3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 1797485574}
+  isSelecting: 0
 --- !u!1 &2120720150
 GameObject:
   m_ObjectHideFlags: 0

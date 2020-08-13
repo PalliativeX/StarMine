@@ -21,7 +21,6 @@ public class Worker : Unit
 	float stoneMiningTime   = 2.3f;
 	float diamondMiningTime = 3.5f;
 
-
 	Voxel targetVoxel;
 
 	float miningTimeLeft = 0f;
@@ -68,7 +67,7 @@ public class Worker : Unit
 		{
 			if (miningTimeLeft > 0f)
 			{
-				miningTimeLeft -= 1 * Time.deltaTime;
+				miningTimeLeft -= Time.deltaTime;
 			}
 			else
 			{

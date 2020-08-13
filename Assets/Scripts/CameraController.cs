@@ -55,7 +55,7 @@ public class CameraController : MonoBehaviour
 		float clampingOffsetZ = 4;
 
 		pos.x = Mathf.Clamp(pos.x, 0, BaseMetrics.Width);
-		pos.z = Mathf.Clamp(pos.z, -clampingOffsetZ, BaseMetrics.Length-clampingOffsetZ);
+		pos.z = Mathf.Clamp(pos.z, -clampingOffsetZ, BaseMetrics.Length - clampingOffsetZ);
 
 		transform.position = pos;
 	}

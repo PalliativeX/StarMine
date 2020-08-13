@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
 
-public class Building : Targetable
+public class Building : Selectable
 {
-	public int capacity; // NOTE: Health
 	
 	protected override void Awake()
 	{

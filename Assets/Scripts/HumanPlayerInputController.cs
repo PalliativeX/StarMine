@@ -1,94 +1,93 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class HumanPlayerInputController : MonoBehaviour
 {
-	public HumanPlayer player;
+	HumanPlayer player;
+	PlayerGUI playerGUI;
+	Camera mainCamera;
+
+	public bool isSelecting;
+	Vector3 initialMousePos;
+
+	void Start()
+	{
+		player = GetComponent<HumanPlayer>();
+		playerGUI = GetComponent<PlayerGUI>();
+		mainCamera = Camera.main;
+	}
 
 	void Update()
 	{
-		if (Input.GetMouseButtonDown(0))
-		{
-			HandleUnitBuildingSelection();
-		}
-		else if (Input.GetMouseButtonDown(1))
-		{
-			HandleUnitMovement();
-		}
+		HandleSelection();
 
-		Unit unitChosen = player.GetUnitChosen();
-		if (unitChosen != null)
-		{
-			if (unitChosen.type == UnitType.Worker)
-			{
-				HandleWorkerInput((Worker)unitChosen);
-			}
-			else if (unitChosen.type == UnitType.Leader)
-			{
-				HandleLeaderInput((Leader)unitChosen);
-			}
-		}
+		HandleUnitMovement();
 
-		Base mainBase = player.GetBase();
-		if (mainBase != null)
+		List<Unit> unitsChosen = player.GetUnitsChosen();
+		foreach (Unit unitChosen in unitsChosen)
 		{
-			HandleBaseInput(mainBase);
-		}
-	}
-
-	void HandleWorkerInput(Worker worker)
-	{
-		if (Input.GetKeyDown(Worker.miningKey))
-		{
-			Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-			if (Physics.Raycast(inputRay, out RaycastHit hit))
+			if (unitChosen != null)
 			{
-				if (hit.collider != null)
+				if (unitChosen.type == UnitType.Worker)
 				{
-					LayerMask colliderMask = 1 << hit.collider.gameObject.layer;
-
-					if (colliderMask != BaseMetrics.terrainMask)
-					{
-						Voxel targetVoxel = hit.collider.gameObject.GetComponent<Voxel>();
-
-						if (Input.GetKey(KeyCode.LeftShift))
-						{
-							worker.AddMineAction(targetVoxel);
-						}
-						else
-						{
-							worker.RemoveAllActions();
-							worker.AddMineAction(targetVoxel);
-						}
-					}
+					HandleWorkerInput((Worker)unitChosen);
+				}
+				else if (unitChosen.type == UnitType.Leader)
+				{
+					HandleLeaderInput((Leader)unitChosen);
 				}
 			}
 		}
+
+		HandleBaseInput();
+
+		playerGUI.CurrentKeyPressed = KeyCode.None;
 	}
 
-	void HandleBaseInput(Base mainBase)
+	void HandleSelection()
 	{
-		if (Input.GetKeyDown(Base.makeWorkerKey) || player.CurrentKeyPressed() == Base.makeWorkerKey)
-		{
-			player.AddUnit(mainBase.CreateWorker());
-		}
-		else if (Input.GetKeyDown(Base.makeLeaderKey) || player.CurrentKeyPressed() == Base.makeLeaderKey)
-		{
-			player.AddUnit(mainBase.CreateLeader());
-			player.HasLeader = true;
-		}
-		else if (Input.GetKeyDown(Base.stopProductionKey) || player.CurrentKeyPressed() == Base.stopProductionKey)
-		{
-			mainBase.StopProduction();
-		}
-	}
+		List<Selectable> selectables = player.GetSelectables();
 
-	void HandleLeaderInput(Leader leader)
-	{
-		if (Input.GetKeyDown(Leader.speedupKey) || player.CurrentKeyPressed() == Leader.speedupKey)
+		if (Input.GetMouseButtonDown(0) && !IsPointerOverUIObject())
 		{
-			leader.ActivateSpeedupAbility();
+			isSelecting = true;
+			initialMousePos = Input.mousePosition;
+			HandleUnitBuildingSelection();
+		}
+		else if (Input.GetMouseButtonUp(0))
+		{
+			isSelecting = false;
+		}
+
+		// NOTE: Selecting units and buildings in the selection box
+		if (isSelecting)
+		{
+			List<Selectable> selected = new List<Selectable>();
+			bool hasBuildingSelected = false;
+			foreach (Selectable selectable in selectables)
+			{
+				if (IsWithinSelectionBounds(selectable))
+				{
+					selectable.Chosen = true;
+					if (selectable is Building)
+						hasBuildingSelected = true;
+					selected.Add(selectable);
+				}
+			}
+
+			// NOTE: We select only buildings if any
+			if (hasBuildingSelected)
+			{
+				foreach (Selectable current in selected)
+				{
+					if (current is Unit)
+					{
+						current.Chosen = false;
+					}
+				}
+			}
 		}
 	}
 
@@ -97,7 +96,7 @@ public class HumanPlayerInputController : MonoBehaviour
 		Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 		if (Physics.Raycast(inputRay, out RaycastHit hit))
 		{
-			if (!player.IsPointerOverUIObject())
+			if (!IsPointerOverUIObject())
 			{
 				if (hit.collider != null)
 				{
@@ -133,50 +132,153 @@ public class HumanPlayerInputController : MonoBehaviour
 		}
 	}
 
-	// TODO: Simplify and rename
-	void HandleUnitMovement()
+	void HandleWorkerInput(Worker worker)
 	{
-		Unit unit = player.GetUnitChosen();
-		if (unit != null)
+		if (Input.GetKeyDown(Worker.miningKey))
 		{
 			Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-			Physics.Raycast(inputRay, out RaycastHit hit);
-
-			// NOTE: Validating destination
-			if (hit.collider != null)
+			if (Physics.Raycast(inputRay, out RaycastHit hit))
 			{
-				LayerMask colliderMask = 1 << hit.collider.gameObject.layer;
-
-				if (colliderMask == BaseMetrics.terrainMask)
+				if (hit.collider != null)
 				{
-					Vector3 dest = hit.point;
-					if (BaseMetrics.IsDestValid(dest))
+					LayerMask colliderMask = 1 << hit.collider.gameObject.layer;
+
+					if (colliderMask == BaseMetrics.terrainMask)
 					{
+						Voxel targetVoxel = hit.collider.gameObject.GetComponent<Voxel>();
+
 						if (Input.GetKey(KeyCode.LeftShift))
 						{
-							unit.AddMoveAction(dest);
+							worker.AddMineAction(targetVoxel);
 						}
 						else
 						{
-							unit.RemoveAllActions();
-							unit.AddMoveAction(dest);
+							worker.RemoveAllActions();
+							worker.AddMineAction(targetVoxel);
 						}
 					}
 				}
-				else if (colliderMask == BaseMetrics.unitMask && hit.collider.gameObject != unit.gameObject)
+			}
+		}
+	}
+
+	void HandleBaseInput()
+	{
+		Base mainBase = player.GetBase();
+		if (mainBase == null || !mainBase.Chosen)
+		{
+			return;
+		}
+
+		if (Input.GetKeyDown(Base.makeWorkerKey) || playerGUI.CurrentKeyPressed == Base.makeWorkerKey)
+		{
+			mainBase.CreateWorker();
+		}
+		else if (Input.GetKeyDown(Base.makeLeaderKey) || playerGUI.CurrentKeyPressed == Base.makeLeaderKey)
+		{
+			mainBase.CreateLeader();
+			//player.HasLeader = true;
+		}
+		else if (Input.GetKeyDown(Base.stopProductionKey) || playerGUI.CurrentKeyPressed == Base.stopProductionKey)
+		{
+			mainBase.StopProduction();
+		}
+	}
+
+	void HandleLeaderInput(Leader leader)
+	{
+		if (Input.GetKeyDown(Leader.speedupKey) || playerGUI.CurrentKeyPressed == Leader.speedupKey)
+		{
+			leader.ActivateSpeedupAbility();
+		}
+	}
+
+	void HandleUnitMovement()
+	{
+		if (Input.GetMouseButtonDown(1))
+		{
+			List<Unit> unitsChosen = player.GetUnitsChosen();
+
+			Vector3 prevUnitPos = Vector3.zero;
+			foreach (Unit unit in unitsChosen)
+			{
+				if (unit != null)
 				{
-					if (Input.GetKey(KeyCode.LeftShift))
+					Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+					Physics.Raycast(inputRay, out RaycastHit hit);
+
+					if (hit.collider != null)
 					{
-						unit.AddAttackAction(hit.collider.gameObject.transform);
-					}
-					else
-					{
-						unit.RemoveAllActions();
-						unit.AddAttackAction(hit.collider.gameObject.transform);
+						LayerMask colliderMask = 1 << hit.collider.gameObject.layer;
+
+						if (colliderMask == BaseMetrics.terrainMask)
+						{
+							Vector3 dest = hit.point;
+							dest.y += 0.3f;
+							if (BaseMetrics.IsDestValid(dest))
+							{
+								if (Input.GetKey(KeyCode.LeftShift))
+								{
+									unit.AddMoveAction(dest);
+								}
+								else
+								{
+									unit.RemoveAllActions();
+									unit.AddMoveAction(dest);
+								}
+							}
+						}
+						else if ((colliderMask == BaseMetrics.unitMask || colliderMask == BaseMetrics.buildingMask) &&
+								  hit.collider.gameObject != unit.gameObject)
+						{
+							if (Input.GetKey(KeyCode.LeftShift))
+							{
+								unit.AddAttackAction(hit.collider.gameObject.transform);
+							}
+							else
+							{
+								unit.RemoveAllActions();
+								unit.AddAttackAction(hit.collider.gameObject.transform);
+							}
+						}
 					}
 				}
 			}
-
 		}
 	}
+
+	private void OnGUI()
+	{
+		if (isSelecting)
+		{
+			var rect = GuiUtils.GetScreenRect(initialMousePos, Input.mousePosition);
+			GuiUtils.DrawScreenRect(rect, new Color(0.8f, 0.8f, 0.95f, 0.25f));
+			GuiUtils.DrawScreenRectBorder(rect, 2, new Color(0.8f, 0.8f, 0.95f));
+		}
+	}
+
+	public bool IsWithinSelectionBounds(Selectable selectable)
+	{
+		if (!isSelecting)
+			return false;
+
+		var viewportBounds =
+			GuiUtils.GetViewportBounds(mainCamera, initialMousePos, Input.mousePosition);
+
+		return viewportBounds.Contains(
+			mainCamera.WorldToViewportPoint(selectable.transform.position));
+	}
+
+	public bool IsPointerOverUIObject()
+	{
+		PointerEventData eventDataCurrentPosition = new PointerEventData(EventSystem.current)
+		{
+			position = new Vector2(Input.mousePosition.x, Input.mousePosition.y)
+		};
+		List<RaycastResult> results = new List<RaycastResult>();
+		EventSystem.current.RaycastAll(eventDataCurrentPosition, results);
+		return results.Count > 0;
+	}
+
+
 }

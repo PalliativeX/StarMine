@@ -17,6 +17,16 @@ class MoveAction : Action
 	}
 }
 
+class FollowAction: Action
+{
+	public Transform target;
+
+	public FollowAction(Transform target)
+	{
+		this.target = target;
+	}
+}
+
 class AttackAction : Action
 {
 	public Transform target;
@@ -27,14 +37,14 @@ class AttackAction : Action
 	}
 }
 
-// TODO: Probably make abstract
-public abstract class Unit : Targetable
+public abstract class Unit : Selectable
 {
 	public float speed;
 	public UnitType type;
 
-	public float health;
 	Transform target;
+
+	Transform friendlyTarget; // NOTE: A friendly unit to follow
 	public int damage;
 	public float attackRange;
 	public float attackCooldown = 0.5f;
@@ -65,6 +75,10 @@ public abstract class Unit : Targetable
 			{
 				destination = ((MoveAction)currentAction).destination;
 			}
+			else if (currentAction is FollowAction)
+			{
+				friendlyTarget = ((FollowAction)currentAction).target;
+			}
 			else if (currentAction is AttackAction)
 			{
 				Transform enemy = ((AttackAction)currentAction).target;
@@ -87,10 +101,15 @@ public abstract class Unit : Targetable
 
 		currentAttackCooldown -= Time.deltaTime;
 
-		TryMove();
+		if (friendlyTarget != null)
+		{
+
+		}
+
+		Move();
 	}
 
-	void TryMove()
+	void Move()
 	{
 		if (destination != Vector3.zero)
 		{
@@ -114,40 +133,23 @@ public abstract class Unit : Targetable
 			return;
 		}
 
-		enemy.gameObject.TryGetComponent(out Unit enemyUnit);
-		if (enemyUnit != null)
+		enemy.gameObject.TryGetComponent(out Selectable target);
+		if (target != null)
 		{
-			enemyUnit.health -= this.damage;
+			target.health -= damage;
 			currentAttackCooldown = attackCooldown;
 			currentAction = null;
-			if (enemyUnit.health <= 0)
+			if (target.health <= 0)
 			{
-				enemyUnit.Die();
+				target.Remove();
 			}
 			else
 			{
 				AddAttackAction(enemy);
 			}
 		}
-		else
-		{
-			enemy.gameObject.TryGetComponent(out Building enemyBuilding);
-			if (enemyBuilding != null)
-			{
-				enemyBuilding.capacity -= this.damage;
-				currentAttackCooldown = attackCooldown;
-				currentAction = null;
-				if (enemyBuilding.capacity <= 0)
-				{
-					enemyBuilding.Destroy();
-				}
-				else
-				{
-					AddAttackAction(enemy);
-				}
-			}
-		}
 	}
+
 
 	public void AddMoveAction(Vector3 destination)
 	{

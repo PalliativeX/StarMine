@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 public class HumanPlayer : Player
 {
@@ -28,34 +27,13 @@ public class HumanPlayer : Player
 	{
 		// Displaying Base panel if a Base is chosen
 		playerGUI.DisplayBasePanel(BaseChosen());
-
-
-		Unit unit = GetUnitChosen();
-		playerGUI.DisplayLeaderPanel(unit != null && unit.type == UnitType.Leader);
-
-
-		playerGUI.CurrentKeyPressed = KeyCode.None;
-	}
-
-	public bool IsPointerOverUIObject()
-	{
-		PointerEventData eventDataCurrentPosition = new PointerEventData(EventSystem.current)
+		
+		List<Unit> unitsChosen = GetUnitsChosen();
+		if (unitsChosen.Count > 0)
 		{
-			position = new Vector2(Input.mousePosition.x, Input.mousePosition.y)
-		};
-		List<RaycastResult> results = new List<RaycastResult>();
-		EventSystem.current.RaycastAll(eventDataCurrentPosition, results);
-		return results.Count > 0;
-	}
-
-	public KeyCode CurrentKeyPressed()
-	{
-		return playerGUI.CurrentKeyPressed;
-	}
-
-	public void SetCurrentKeyPressed(KeyCode keyCode)
-	{
-		playerGUI.CurrentKeyPressed = keyCode;
+			Unit unit = unitsChosen[0];
+			playerGUI.DisplayLeaderPanel(unit != null && unit.type == UnitType.Leader);
+		}
 	}
 
 }

@@ -14,13 +14,9 @@ public class BaseMetrics
 	public static LayerMask unitMask;
 	public static LayerMask buildingMask;
 
-	static Vector3[] baseSpawns = 
-	{
-		new Vector3(10, 0f, 10),
-		new Vector3(10, 0f, length - 10),
-		new Vector3(width - 10, 0f, length - 10),
-		new Vector3(width - 10, 0f, 10)
-	};
+	static float baseHeight = 0.35f;
+
+	static Vector3[] baseSpawns = new Vector3[4];
 
 	public static Vector3 GetFirstBaseSpawn()
 	{
@@ -51,13 +47,14 @@ public class BaseMetrics
 	{
 		radius -= 0.1f;
 
+		float sqrt = Mathf.Sqrt(Mathf.Pow(currentLoc.x - sphereLoc.x, 2) + Mathf.Pow(currentLoc.z - sphereLoc.z, 2) + Mathf.Pow(currentLoc.y - sphereLoc.y, 2));
+
 		Vector3 point = new Vector3
 		{
-			x = sphereLoc.x + radius * ((currentLoc.x - sphereLoc.x) / Mathf.Sqrt(Mathf.Pow(currentLoc.x - sphereLoc.x, 2) + Mathf.Pow(currentLoc.z - sphereLoc.z, 2) + Mathf.Pow(currentLoc.y - sphereLoc.y, 2))),
-			y = sphereLoc.y + radius * ((currentLoc.y - sphereLoc.y) / Mathf.Sqrt(Mathf.Pow(currentLoc.x - sphereLoc.x, 2) + Mathf.Pow(currentLoc.z - sphereLoc.z, 2) + Mathf.Pow(currentLoc.y - sphereLoc.y, 2))),
-			z = sphereLoc.z + radius * ((currentLoc.z - sphereLoc.z) / Mathf.Sqrt(Mathf.Pow(currentLoc.x - sphereLoc.x, 2) + Mathf.Pow(currentLoc.z - sphereLoc.z, 2) + Mathf.Pow(currentLoc.y - sphereLoc.y, 2)))
+			x = sphereLoc.x + radius * ((currentLoc.x - sphereLoc.x) / sqrt),
+			y = sphereLoc.y + radius * ((currentLoc.y - sphereLoc.y) / sqrt),
+			z = sphereLoc.z + radius * ((currentLoc.z - sphereLoc.z) / sqrt)
 		};
-
 
 		return point;
 	}
@@ -76,10 +73,10 @@ public class BaseMetrics
 
 	static void UpdateBaseSpawns()
 	{
-		baseSpawns[0] = new Vector3(10, 0f, 10);
-		baseSpawns[1] = new Vector3(10, 0f, length - 10);
-		baseSpawns[2] = new Vector3(width - 10, 0f, length - 10);
-		baseSpawns[3] = new Vector3(width - 10, 0f, 10);
+		baseSpawns[0] = new Vector3(10, baseHeight, 10);
+		baseSpawns[1] = new Vector3(10, baseHeight, length - 10);
+		baseSpawns[2] = new Vector3(width - 10, baseHeight, length - 10);
+		baseSpawns[3] = new Vector3(width - 10, baseHeight, 10);
 	}
 
 	public static int Width

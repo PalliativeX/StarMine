@@ -11,19 +11,24 @@ public class Base : Building
 	public static KeyCode makeLeaderKey = KeyCode.L;
 	public static KeyCode stopProductionKey = KeyCode.Escape;
 
+	public static Vector3 workerCost = new Vector3(0, 50, 0);
+	public static Vector3 leaderCost = new Vector3(0, 100, 5);
+
 	readonly int workerProductionTime = 10;
 	readonly int leaderProductionTime = 25;
 	bool inProduction = false;
 	float productionTimeLeft = 0f;
+	Vector3 currentCost;
 
-	Vector3 spawnRelativeToBase = new Vector3(-2.9f, 0.7f, 0.35f);
-	public Vector3 RallyPoint { get; set; } // Relative to current unit pos
+	Vector3 spawnRelativeToBase;
+	Vector3 rallyPoint;
 
 	protected override void Start()
 	{
 		base.Start();
 
-		RallyPoint = new Vector3(-1.3f, 0f, 0);
+		spawnRelativeToBase = new Vector3(-2.9f, 0.8f, 0.35f);
+		rallyPoint = transform.position - new Vector3(3.5f, 0f, 0.35f);
 	}
 
 	protected override void Update()
@@ -31,30 +36,53 @@ public class Base : Building
 		base.Update();
 	}
 
-	public Worker CreateWorker()
+	public void CreateWorker()
 	{
-		Worker worker = Instantiate(workerPrefab, transform);
-		worker.transform.localPosition = spawnRelativeToBase;
-
-		worker.AddMoveAction(worker.transform.position + RallyPoint);
-
-		return worker;
+		if (!inProduction && player.HasEnoughResources(workerCost))
+		{
+			StartCoroutine(ProduceUnit(workerProductionTime, workerPrefab, workerCost));
+		}
 	}
 
-	public Leader CreateLeader()
+	public void CreateLeader()
 	{
-		Leader leader = Instantiate(leaderPrefab, transform);
-		leader.transform.localPosition = spawnRelativeToBase;
+		if (!inProduction && player.HasEnoughResources(leaderCost))
+		{
+			StartCoroutine(ProduceUnit(leaderProductionTime, leaderPrefab, leaderCost));
+		}
+	}
 
-		leader.AddMoveAction(leader.transform.position + RallyPoint);
+	IEnumerator ProduceUnit(float productionTime, Unit prefab, Vector3 unitCost)
+	{
+		inProduction = true;
+		productionTimeLeft = productionTime;
+		player.SubtractResources(unitCost);
+		currentCost = unitCost;
 
-		return leader;
+		while (inProduction && productionTimeLeft > 0f)
+		{
+			productionTimeLeft -= Time.deltaTime;
+
+			yield return null;
+		}
+
+		if (inProduction)
+		{
+			Unit unit = Instantiate(prefab, player.transform);
+			player.AddUnit(unit);
+			unit.transform.position = transform.position + spawnRelativeToBase;
+			unit.AddMoveAction(rallyPoint);
+
+			inProduction = false;
+			productionTimeLeft = 0f;
+		}
 	}
 
 	public void StopProduction()
 	{
 		inProduction = false;
 		productionTimeLeft = 0f;
+		player.AddResources(currentCost);
 	}
 
 }

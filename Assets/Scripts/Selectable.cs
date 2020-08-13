@@ -1,11 +1,16 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.UI;
 
-public abstract class Targetable : MonoBehaviour
+public abstract class Selectable : MonoBehaviour
 {
+	public GameObject selectionCircle;
+	public Image healthBar;
+
 	protected bool chosen;
 	protected Team team;
+
+	public float maxHealth;
+	public float health;
 
 	Color defaultColor;
 
@@ -32,17 +37,22 @@ public abstract class Targetable : MonoBehaviour
 			defaultColor += BaseMetrics.blueTeamColorAdd;
 		}
 		ownMeshRenderer.material.color = defaultColor;
+
+		health = maxHealth;
 	}
 
-	protected virtual void Start()
-    {
-        
-    }
+	protected virtual void Start() { }
 
 	protected virtual void Update()
-    {
-        
-    }
+	{
+		//healthBar.TryGetComponent<SpriteRenderer>().
+		healthBar.fillAmount = health / maxHealth;
+	}
+
+	public void Remove()
+	{
+		player.Remove(this);
+	}
 
 	public bool Chosen
 	{
@@ -50,11 +60,11 @@ public abstract class Targetable : MonoBehaviour
 		set {
 			if (value)
 			{
-				ownMeshRenderer.material.color = Color.green;
+				selectionCircle.SetActive(true);
 			}
 			else
 			{
-				ownMeshRenderer.material.color = defaultColor;
+				selectionCircle.SetActive(false);
 			}
 
 			chosen = value;

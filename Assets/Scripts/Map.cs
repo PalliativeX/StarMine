@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+#pragma warning disable 0649
+
 public enum MapType
 {
 	Small, Medium, Large
@@ -24,6 +26,11 @@ public class Map : MonoBehaviour
 	LayerMask terrainMask, unitMask, buildingMask;
 
 	private void Awake()
+	{
+		GenerateMap();
+	}
+
+	public void GenerateMap()
 	{
 		switch (mapType)
 		{
@@ -56,7 +63,7 @@ public class Map : MonoBehaviour
 		BaseMetrics.terrainMask = terrainMask;
 		BaseMetrics.unitMask = unitMask;
 		BaseMetrics.buildingMask = buildingMask;
-}
+	}
 
 	// TODO: Only update when a Voxel has been destroyed
 	private void Update()
@@ -89,7 +96,7 @@ public class Map : MonoBehaviour
 		}
 	}
 
-	public int Width  { get { return width;  } }
+	public int Width { get { return width; } }
 	public int Length { get { return length; } }
 	public int Height { get { return height; } }
 

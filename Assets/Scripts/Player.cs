@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+#pragma warning disable 0649
+
 public enum Team
 {
 	RED, BLUE
@@ -89,6 +91,21 @@ public abstract class Player : MonoBehaviour
 		buildings.Add(building);
 	}
 
+	public void Remove(Selectable targetable)
+	{
+		targetable.gameObject.TryGetComponent(out Building building);
+		if (building != null)
+		{
+			buildings.Remove(building);
+		}
+		else
+		{
+			units.Remove((Unit)targetable);
+		}
+
+		Destroy(targetable.gameObject);
+	}
+
 	public void RemoveBuilding(Building building)
 	{
 		buildings.Remove(building);
@@ -105,27 +122,32 @@ public abstract class Player : MonoBehaviour
 		buildings.Remove(building);
 	}
 
-	public Unit GetUnitChosen()
+	public List<Unit> GetUnitsChosen()
 	{
+		List<Unit> unitsChosen = new List<Unit>();
+
 		foreach (Unit unit in units)
 		{
 			if (unit.Chosen)
-				return unit;
+				unitsChosen.Add(unit);
 		}
-		return null;
+
+		return unitsChosen;
 	}
 
-	public Building GetBuildingChosen()
+	public List<Building> GetBuildingsChosen()
 	{
+		List<Building> buildingsChosen = new List<Building>();
+
 		foreach (Building building in buildings)
 		{
 			if (building.Chosen)
-				return building;
+				buildingsChosen.Add(building);
 		}
-		return null;
+		return buildingsChosen;
 	}
 
-	public Targetable GetTargetableChosen()
+	public Selectable GetTargetableChosen()
 	{
 		foreach (Unit unit in units)
 		{
@@ -167,6 +189,22 @@ public abstract class Player : MonoBehaviour
 		return false;
 	}
 
+	public List<Selectable> GetSelectables()
+	{
+		List<Selectable> selectables = new List<Selectable>();
+
+		foreach (Unit unit in units)
+		{
+			selectables.Add(unit);
+		}
+		foreach (Building building in buildings)
+		{
+			selectables.Add(building);
+		}
+
+		return selectables;
+	}
+
 	public Base GetBase()
 	{
 		foreach (Building building in buildings)
@@ -197,6 +235,27 @@ public abstract class Player : MonoBehaviour
 				return true;
 		}
 		return false;
+	}
+
+	public bool HasEnoughResources(Vector3 requiredResources)
+	{
+		return Earth    >= requiredResources.x &&
+			   Stones   >= requiredResources.y &&
+			   Diamonds >= requiredResources.z;
+	}
+
+	public void SubtractResources(Vector3 resources)
+	{
+		Earth -= (int)resources.x;
+		Stones -= (int)resources.y;
+		Diamonds -= (int)resources.z;
+	}
+
+	public void AddResources(Vector3 resources)
+	{
+		Earth += (int)resources.x;
+		Stones += (int)resources.y;
+		Diamonds += (int)resources.z;
 	}
 
 	public int Earth
