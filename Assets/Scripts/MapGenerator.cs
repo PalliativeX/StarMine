@@ -2,11 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum MapSize
-{
-	Small, Medium, Large
-}
-
 public class MapGenerator : MonoBehaviour
 {
 	public bool useFixedSeed;
@@ -23,6 +18,8 @@ public class MapGenerator : MonoBehaviour
 	public float earthPercentLow = 0f;
 
 	public Voxel earthVoxelPrefab, stoneVoxelPrefab, diamondVoxelPrefab, lavaVoxelPrefab;
+
+	public Transform settingStoneVoxelPrefab;
 
 	public void GenerateMap(MapChunk[] chunks, Voxel[] voxels, int width, int length, int height)
 	{
@@ -47,7 +44,7 @@ public class MapGenerator : MonoBehaviour
 					}
 					else
 					{
-						float currentHeight = (float)y / (float)height;
+						float currentHeight = y / (float)height;
 						float diamondsPercent = Mathf.Lerp(diamondsPercentHigh, diamondsPercentLow, currentHeight);
 						float earthPercent = Mathf.Lerp(earthPercentHigh, earthPercentLow, currentHeight);
 
@@ -78,6 +75,63 @@ public class MapGenerator : MonoBehaviour
 		}
 
 		Random.state = originalRandomState;
+	}
+
+	// NOTE: Probably we should store the created setting
+	// TODO: Write this normally!
+	public void GenerateSetting(int width, int length)//, int height)
+	{
+		int settingOffset = (int)BaseMetrics.settingOffset;
+
+		for (float y = 0.2f; y <= 1; y++)
+		{
+			for (int z = -5; z < length+settingOffset; z++)
+			{
+				for (int x = -settingOffset; x < 0; x++)
+				{
+					Transform newVoxel = Instantiate(settingStoneVoxelPrefab);
+					newVoxel.localPosition = new Vector3(x, y, z);
+					newVoxel.SetParent(transform, false);
+				}
+			}
+		}
+		for (float y = 0.2f; y <= 1; y++)
+		{
+			for (int z = -settingOffset; z < length + settingOffset; z++)
+			{
+				for (int x = width; x < width+settingOffset; x++)
+				{
+					Transform newVoxel = Instantiate(settingStoneVoxelPrefab);
+					newVoxel.localPosition = new Vector3(x, y, z);
+					newVoxel.SetParent(transform, false);
+				}
+			}
+		}
+
+		for (float y = 0.2f; y <= 1; y++)
+		{
+			for (int z = -settingOffset; z < 0; z++)
+			{
+				for (int x = 0; x < width; x++)
+				{
+					Transform newVoxel = Instantiate(settingStoneVoxelPrefab);
+					newVoxel.localPosition = new Vector3(x, y, z);
+					newVoxel.SetParent(transform, false);
+				}
+			}
+		}
+		for (float y = 0.2f; y <= 1; y++)
+		{
+			for (int z = length; z < length + settingOffset; z++)
+			{
+				for (int x = 0; x < width; x++)
+				{
+					Transform newVoxel = Instantiate(settingStoneVoxelPrefab);
+					newVoxel.localPosition = new Vector3(x, y, z);
+					newVoxel.SetParent(transform, false);
+				}
+			}
+		}
 	}
 
 }

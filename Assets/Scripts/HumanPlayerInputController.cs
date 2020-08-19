@@ -21,10 +21,6 @@ public class HumanPlayerInputController : MonoBehaviour
 
 	void Update()
 	{
-		HandleSelection();
-
-		HandleUnitMovement();
-
 		List<Unit> unitsChosen = player.GetUnitsChosen();
 		foreach (Unit unitChosen in unitsChosen)
 		{
@@ -40,6 +36,21 @@ public class HumanPlayerInputController : MonoBehaviour
 				}
 			}
 		}
+		List<Building> buildingsChosen = player.GetBuildingsChosen();
+		foreach (Building building in buildingsChosen)
+		{
+			if (building != null)
+			{
+				if (building is Barracks)
+				{
+					HandleBarracksInput((Barracks)building);
+				}
+			}
+		}
+
+		HandleSelection();
+
+		HandleUnitMovement();
 
 		HandleBaseInput();
 
@@ -54,7 +65,7 @@ public class HumanPlayerInputController : MonoBehaviour
 		{
 			isSelecting = true;
 			initialMousePos = Input.mousePosition;
-			HandleUnitBuildingSelection();
+			HandleUnitBuildingSelection(selectables);
 		}
 		else if (Input.GetMouseButtonUp(0))
 		{
@@ -91,8 +102,20 @@ public class HumanPlayerInputController : MonoBehaviour
 		}
 	}
 
-	void HandleUnitBuildingSelection()
+	void HandleUnitBuildingSelection(List<Selectable> selectables)
 	{
+		// TODO: Check this again for bugs
+		foreach (Selectable selectable in selectables)
+		{
+			if (selectable is Worker worker)
+			{
+				if (worker.BuildingStatus == BuildingStatus.Selected)
+				{
+					return;
+				}
+			}
+		}
+
 		Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 		if (Physics.Raycast(inputRay, out RaycastHit hit))
 		{
@@ -100,32 +123,15 @@ public class HumanPlayerInputController : MonoBehaviour
 			{
 				if (hit.collider != null)
 				{
+					player.SetAllChosenFalse();
 					LayerMask colliderMask = 1 << hit.collider.gameObject.layer;
-					// Unit
-					if (colliderMask == BaseMetrics.unitMask)
+					if (colliderMask == BaseMetrics.unitMask || colliderMask == BaseMetrics.buildingMask)
 					{
-						player.SetAllChosenFalse();
-
-						Unit unit = hit.collider.gameObject.GetComponent<Unit>();
-						if (unit.Team == player.Team)
+						Selectable selectable = hit.collider.gameObject.GetComponent<Selectable>();
+						if (selectable.Team == player.Team)
 						{
-							unit.Chosen = true;
+							selectable.Chosen = true;
 						}
-					}
-					// Building
-					else if (colliderMask == BaseMetrics.buildingMask)
-					{
-						player.SetAllChosenFalse();
-
-						Building building = hit.collider.gameObject.GetComponent<Building>();
-						if (building.Team == player.Team)
-						{
-							building.Chosen = true;
-						}
-					}
-					else
-					{
-						player.SetAllChosenFalse();
 					}
 				}
 			}
@@ -160,6 +166,51 @@ public class HumanPlayerInputController : MonoBehaviour
 				}
 			}
 		}
+
+		if (Input.GetKeyDown(Worker.selectionModeKey) || playerGUI.CurrentKeyPressed == Worker.selectionModeKey)
+		{
+			worker.BuildingStatus = BuildingStatus.Selection;
+		}
+
+		if (Input.GetKeyDown(Worker.cancelKey))
+		{
+			if (worker.BuildingStatus == BuildingStatus.Selection)
+			{
+				worker.BuildingStatus = BuildingStatus.None;
+			}
+			else if (worker.BuildingStatus == BuildingStatus.Selected)
+			{
+				// TODO: Still check this
+				worker.BuildingStatus = BuildingStatus.Selection;
+				worker.DestroyHologram();
+			}
+		}
+
+		if (worker.BuildingStatus == BuildingStatus.Selection)
+		{
+			if (Input.GetKeyDown(Worker.selectTurretKey) || playerGUI.CurrentKeyPressed == Worker.selectTurretKey)
+			{
+				worker.CreateBuildingHologram(Worker.selectTurretKey);
+			}
+			else if (Input.GetKeyDown(Worker.selectBarracksKey) || playerGUI.CurrentKeyPressed == Worker.selectBarracksKey)
+			{
+				worker.CreateBuildingHologram(Worker.selectBarracksKey);
+			}
+		}
+
+		if (Input.GetMouseButtonUp(0) && worker.BuildingStatus == BuildingStatus.Selected)
+		{
+			Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+			if (Physics.Raycast(ray, out RaycastHit hit))
+			{
+				if (!Input.GetKey(KeyCode.LeftShift))
+				{
+					worker.RemoveAllActions();
+				}
+				worker.AddBuildAction(hit.transform.position + Vector3.up * BaseMetrics.VoxelDimension*0.5f);
+			}
+		}
+
 	}
 
 	void HandleBaseInput()
@@ -177,7 +228,7 @@ public class HumanPlayerInputController : MonoBehaviour
 		else if (Input.GetKeyDown(Base.makeLeaderKey) || playerGUI.CurrentKeyPressed == Base.makeLeaderKey)
 		{
 			mainBase.CreateLeader();
-			//player.HasLeader = true;
+			player.HasLeader = true;
 		}
 		else if (Input.GetKeyDown(Base.stopProductionKey) || playerGUI.CurrentKeyPressed == Base.stopProductionKey)
 		{
@@ -193,13 +244,24 @@ public class HumanPlayerInputController : MonoBehaviour
 		}
 	}
 
+	void HandleBarracksInput(Barracks barracks)
+	{
+		if (Input.GetKeyDown(Barracks.makeWarriorKey)) // TODO: ||
+		{
+			barracks.CreateWarrior();
+		}
+		else if (Input.GetKeyDown(Barracks.makeSoldierKey))
+		{
+			barracks.CreateSoldier();
+		}
+	}
+
 	void HandleUnitMovement()
 	{
 		if (Input.GetMouseButtonDown(1))
 		{
 			List<Unit> unitsChosen = player.GetUnitsChosen();
 
-			Vector3 prevUnitPos = Vector3.zero;
 			foreach (Unit unit in unitsChosen)
 			{
 				if (unit != null)
@@ -214,7 +276,6 @@ public class HumanPlayerInputController : MonoBehaviour
 						if (colliderMask == BaseMetrics.terrainMask)
 						{
 							Vector3 dest = hit.point;
-							dest.y += 0.3f;
 							if (BaseMetrics.IsDestValid(dest))
 							{
 								if (Input.GetKey(KeyCode.LeftShift))
@@ -229,7 +290,7 @@ public class HumanPlayerInputController : MonoBehaviour
 							}
 						}
 						else if ((colliderMask == BaseMetrics.unitMask || colliderMask == BaseMetrics.buildingMask) &&
-								  hit.collider.gameObject != unit.gameObject)
+								  hit.collider.gameObject != unit.gameObject && hit.collider.gameObject.GetComponent<Selectable>().Team != unit.Team)
 						{
 							if (Input.GetKey(KeyCode.LeftShift))
 							{

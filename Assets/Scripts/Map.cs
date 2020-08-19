@@ -11,16 +11,14 @@ public enum MapType
 
 public class Map : MonoBehaviour
 {
+	public MapGenerator mapGenerator;
 	public MapType mapType;
 	int width, length, height;
 
-	// TODO: Fix chunks
 	int chunkSize = 512;
 	MapChunk[] chunks;
 
 	Voxel[] voxels;
-
-	public MapGenerator mapGenerator;
 
 	[SerializeField]
 	LayerMask terrainMask, unitMask, buildingMask;
@@ -28,6 +26,7 @@ public class Map : MonoBehaviour
 	private void Awake()
 	{
 		GenerateMap();
+		//mapGenerator.GenerateSetting(width, length);//, height);
 	}
 
 	public void GenerateMap()
@@ -82,7 +81,7 @@ public class Map : MonoBehaviour
 				{
 					Voxel currentVoxel = voxels[x + y * width + z * width * height];
 
-					if (occluderFound)
+					if (occluderFound && !currentVoxel.hasNeighborMined)
 					{
 						currentVoxel.gameObject.SetActive(false);
 					}
@@ -90,6 +89,25 @@ public class Map : MonoBehaviour
 					{
 						occluderFound = true;
 						currentVoxel.gameObject.SetActive(true);
+					}
+					else if (currentVoxel.mined)
+					{
+						currentVoxel.gameObject.SetActive(false);
+
+						// FIXME: A temp solution
+						Voxel[] neighborVoxels =
+						{
+							voxels[(x-1) + y * width + z* width * height],
+							voxels[x + y * width + (z+1) * width * height],
+							voxels[(x+1) + y * width + z * width * height],
+							voxels[x + y * width + (z-1) * width * height]
+						};
+
+						foreach (Voxel neighbor in neighborVoxels)
+						{
+							neighbor.gameObject.SetActive(true);
+							neighbor.hasNeighborMined = true;
+						}
 					}
 				}
 			}

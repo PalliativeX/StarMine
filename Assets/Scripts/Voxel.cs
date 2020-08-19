@@ -12,4 +12,5 @@ public class Voxel : MonoBehaviour
 	public ResourceType type;
 	public int amount;
 	public bool mined;
+	public bool hasNeighborMined;
 }

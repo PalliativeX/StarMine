@@ -10,6 +10,8 @@ public class PlayerGUI : MonoBehaviour
 
 	public Transform basePanel;
 	public Transform leaderPanel;
+	public Transform workerPanel;
+	public Transform workerSelectionPanel;
 
 	KeyCode currentlyPressedKey;
 
@@ -19,6 +21,8 @@ public class PlayerGUI : MonoBehaviour
 		currentlyPressedKey = KeyCode.None;
 		basePanel.gameObject.SetActive(false);
 		leaderPanel.gameObject.SetActive(false);
+		workerPanel.gameObject.SetActive(false);
+		workerSelectionPanel.gameObject.SetActive(false);
 	}
 
 	private void Update()
@@ -42,6 +46,16 @@ public class PlayerGUI : MonoBehaviour
 	public void DisplayLeaderPanel(bool toggle)
 	{
 		leaderPanel.gameObject.SetActive(toggle);
+	}
+
+	public void DisplayWorkerPanel(bool toggle)
+	{
+		workerPanel.gameObject.SetActive(toggle);
+	}
+
+	public void DisplayWorkerSelectionPanel(bool toggle)
+	{
+		workerSelectionPanel.gameObject.SetActive(toggle);
 	}
 
 	public void SetKeyCode(string keyStr)

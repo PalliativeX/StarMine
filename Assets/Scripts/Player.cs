@@ -51,11 +51,11 @@ public abstract class Player : MonoBehaviour
 		Worker worker = Instantiate(workerPrefab, transform);
 		if (team == Team.RED)
 		{
-			worker.transform.localPosition = new Vector3(3, 0.5f, 3);
+			worker.transform.localPosition = new Vector3(3, 0.6f, 3);
 		}
 		else
 		{
-			worker.transform.localPosition = new Vector3(6, 0.5f, 6);
+			worker.transform.localPosition = new Vector3(6, 0.6f, 6);
 		}
 		AddUnit(worker);
 

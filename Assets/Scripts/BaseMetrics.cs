@@ -7,12 +7,16 @@ public class BaseMetrics
 {
 	static int width, length;
 
+	public static float settingOffset = 6f;
+
 	public static Color redTeamColorAdd = new Color(1.5f, 0f, 0f, 1f);
 	public static Color blueTeamColorAdd = new Color(0f, 0f, 1.5f, 1f);
 
 	public static LayerMask terrainMask;
 	public static LayerMask unitMask;
 	public static LayerMask buildingMask;
+
+	public static float VoxelDimension = 1f;
 
 	static float baseHeight = 0.35f;
 

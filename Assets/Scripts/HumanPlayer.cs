@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class HumanPlayer : Player
 {
+	public bool isInTestMode;
 	PlayerGUI playerGUI;
 
 	protected override void Start()
@@ -14,6 +15,13 @@ public class HumanPlayer : Player
 		team = Team.RED;
 
 		AddBaseAndWorker();
+
+		if (isInTestMode)
+		{
+			earth = 1000;
+			stones = 1000;
+			diamonds = 1000;
+		}
 	}
 
 	protected override void Update()
@@ -25,6 +33,11 @@ public class HumanPlayer : Player
 
 	void HandlePanelDisplay()
 	{
+		// FIX
+		playerGUI.DisplayWorkerPanel(false);
+		playerGUI.DisplayWorkerSelectionPanel(false);
+		playerGUI.DisplayLeaderPanel(false);
+
 		// Displaying Base panel if a Base is chosen
 		playerGUI.DisplayBasePanel(BaseChosen());
 		
@@ -32,7 +45,19 @@ public class HumanPlayer : Player
 		if (unitsChosen.Count > 0)
 		{
 			Unit unit = unitsChosen[0];
-			playerGUI.DisplayLeaderPanel(unit != null && unit.type == UnitType.Leader);
+
+			playerGUI.DisplayLeaderPanel(unit is Leader);
+			if (unit is Worker worker)
+			{
+				if (worker.BuildingStatus == BuildingStatus.None || worker.BuildingStatus == BuildingStatus.InProgress)
+				{
+					playerGUI.DisplayWorkerPanel(true);
+				}
+				else if (worker.BuildingStatus == BuildingStatus.Selected || worker.BuildingStatus == BuildingStatus.Selection)
+				{
+					playerGUI.DisplayWorkerSelectionPanel(true);
+				}
+			}
 		}
 	}
 

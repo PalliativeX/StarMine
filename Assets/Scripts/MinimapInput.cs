@@ -1,4 +1,7 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
+
+#pragma warning disable 0649
 
 public class MinimapInput : MonoBehaviour
 {
@@ -18,6 +21,7 @@ public class MinimapInput : MonoBehaviour
 		max.y = min.y + minimapPanel.sizeDelta.y;
 	}
 
+	
 	private void Update()
 	{
 		if (Input.GetMouseButton(0) && !inputController.isSelecting)
@@ -37,5 +41,6 @@ public class MinimapInput : MonoBehaviour
 			}
 		}
 	}
+	
 
 }
